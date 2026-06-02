@@ -37,4 +37,30 @@ ON Customers.CustomerID = Orders.CustomerID
 WHERE Orders.CustomerID IS NULL;
 
 
+-- Right Join
+
+SELECT Orders.OrderID, COnCAt_WS(' ',Employees.LastName, Employees.FirstName) as Name
+FROM Orders
+RIGHT JOIN Employees
+ON Orders.EmployeeID = Employees.EmployeeID
+ORDER BY Orders.OrderID;
+
+
+-- Full Join
+
+SELECT Customers.CustomerName, Orders.OrderID
+FROM Customers
+FULL JOIN Orders
+ON Customers.CustomerID = Orders.CustomerID;
+
+
+-- Self Join
+
+SELECT A.CustomerName AS CustomerName1, B.CustomerName AS CustomerName2, A.City
+FROM Customers A, Customers B
+WHERE A.CustomerID <> B.CustomerID
+AND A.City = B.City 
+ORDER BY A.City;
+
+
 
