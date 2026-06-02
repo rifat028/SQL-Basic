@@ -63,4 +63,40 @@ AND A.City = B.City
 ORDER BY A.City;
 
 
+-- Union 
+
+SELECT Country FROM Customers
+UNION
+SELECT Country FROM Suppliers
+ORDER BY Country;
+
+SELECT City, Country FROM Customers
+WHERE Country='Germany'
+UNION
+SELECT City, Country FROM Suppliers
+WHERE Country='Germany'
+ORDER BY City;
+
+SELECT 'Customer' AS Type, ContactName, City, Country
+FROM Customers
+UNION
+SELECT 'Supplier', ContactName, City, Country
+FROM Suppliers;
+
+
+-- Union All
+
+SELECT Country FROM Customers
+UNION ALL
+SELECT Country FROM Suppliers
+ORDER BY Country;
+
+SELECT City, Country FROM Customers
+WHERE Country='Germany'
+UNION ALL
+SELECT City, Country FROM Suppliers
+WHERE Country='Germany'
+ORDER BY City;
+
+
 
