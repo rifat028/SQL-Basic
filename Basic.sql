@@ -150,6 +150,28 @@ WHERE EXISTS (
 );
 
 
+-- Any
+
+SELECT ProductName 
+FROM Products
+WHERE ProductID = ANY (SELECT ProductID FROM OrderDetails WHERE Quantity = 10);
+
+SELECT ProductName
+FROM Products
+WHERE ProductID = ANY (SELECT ProductID FROM OrderDetails WHERE Quantity > 99);
+
+SELECT ProductName
+FROM Products
+WHERE ProductID = ANY (SELECT ProductID FROM OrderDetails WHERE Quantity > 1000);
+
+
+-- All
+SELECT ProductName 
+FROM Products
+WHERE ProductID != ALL (SELECT ProductID FROM OrderDetails WHERE Quantity = 10);
+
+
+
 
 
 
