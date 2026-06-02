@@ -99,4 +99,58 @@ WHERE Country='Germany'
 ORDER BY City;
 
 
+-- Group By
+
+SELECT Country, COUNT(CustomerID) AS [Number of Customers]
+FROM Customers
+GROUP BY Country;
+
+SELECT Country, COUNT(CustomerID) AS [Number of Customers]
+FROM Customers
+GROUP BY Country
+ORDER BY COUNT(CustomerID) DESC;
+
+SELECT Shippers.ShipperName, COUNT(Orders.OrderID) AS NumberOfOrders
+FROM Orders
+LEFT JOIN Shippers
+ON Orders.ShipperID = Shippers.ShipperID
+GROUP BY ShipperName;
+
+
+-- Having
+
+SELECT Country, COUNT(CustomerID) AS [Number of Customers]
+FROM Customers
+GROUP BY Country
+HAVING COUNT(CustomerID) > 5;
+
+SELECT Country, COUNT(CustomerID) AS [Number of Customers]
+FROM Customers
+GROUP BY Country
+HAVING COUNT(CustomerID) > 5
+ORDER BY COUNT(CustomerID) DESC;
+
+
+-- Exists
+
+SELECT SupplierName
+FROM Suppliers
+WHERE EXISTS (
+  SELECT ProductName
+  FROM Products
+  WHERE Products.SupplierID = Suppliers.supplierID AND Price < 10
+);
+
+SELECT SupplierName
+FROM Suppliers
+WHERE EXISTS (
+  SELECT ProductName
+  FROM Products
+  WHERE Products.SupplierID = Suppliers.supplierID AND Price = 22
+);
+
+
+
+
+
 
