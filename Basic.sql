@@ -171,7 +171,53 @@ FROM Products
 WHERE ProductID != ALL (SELECT ProductID FROM OrderDetails WHERE Quantity = 10);
 
 
+-- Select into
 
+SELECT * INTO CustomersBackup2026
+FROM Customers;
+
+SELECT * INTO CustomersBackup2026 IN 'Backup.mdb'
+FROM Customers;
+
+SELECT CustomerName, ContactName INTO Customers2
+FROM Customers;
+
+SELECT * INTO US_Customers
+FROM Customers
+WHERE Country = 'USA';
+
+SELECT Customers.CustomerName, Orders.OrderID INTO CustomersOrder
+FROM Customers
+LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
+
+SELECT * INTO newtable
+FROM sourcetable
+WHERE 1 = 0;
+
+
+-- Insert into select 
+
+INSERT INTO Customers (CustomerName, City, Country)
+SELECT SupplierName, City, Country FROM Suppliers;
+
+INSERT INTO Customers
+SELECT * FROM Suppliers;
+
+INSERT INTO Customers (CustomerName, City, Country)
+SELECT SupplierName, City, Country FROM Suppliers
+WHERE Country='Germany';
+
+
+
+-- Case
+
+SELECT ProductName, Price,
+CASE
+  WHEN Price < 20 THEN 'Low Cost'
+  WHEN Price BETWEEN 20 AND 50 THEN 'Medium Cost'
+  ELSE 'High Cost'
+END AS PriceCategory
+FROM Products;
 
 
 
