@@ -84,11 +84,29 @@ SELECT c.CategoryID, c.CategoryName, p.ProductName, p.Price
 From Categories c LEFT Join Products p
 on p.CategoryID = c.CategoryID 
 WHERE Price = (
-    SELECT MAX(Price)
-    FROM Products
-    WHERE  p.CategoryID = CategoryID
+    SELECT MAX(p2.Price)
+    FROM Products p2
+    WHERE  p.CategoryID = p2.CategoryID
     )
 ORDER BY p.CategoryID ASC
+--alternative
+SELECT c.CategoryID,
+       c.CategoryName,
+       p.ProductName,
+       p.Price
+FROM Categories c
+JOIN (
+    SELECT CategoryID,
+           MAX(Price) AS MaxPrice
+    FROM Products
+    GROUP BY CategoryID
+) p1
+ON c.CategoryID = p1.CategoryID
+JOIN Products p
+ON p.CategoryID = p1.CategoryID
+AND p.Price = p1.MaxPrice
+ORDER BY c.CategoryID;
+
 
 -- ### 13. List suppliers that provide products costing more than $50.
 SELECT s.SupplierID, s.SupplierName 
@@ -106,7 +124,7 @@ FROM OrderDetails
 GROUP BY OrderID
 
 -- ### 15. Find customers who ordered products from more than one category.
-SELECT c.CustomerID, c.CustomerName, COUNT(CategoryID) as [CAtegory Ordered]
+SELECT c.CustomerID, c.CustomerName, COUNT(DISTINCT CategoryID) as [Total CAtegory Ordered]
 FROM Customers c INNER JOIN Orders o
 ON c.CustomerID = o.CustomerID 
 LEFT JOIN OrderDetails od 
@@ -114,28 +132,108 @@ ON o.OrderID = od.OrderID
 LEFT JOIN Products p
 ON od.ProductID = p.ProductID
 GROUP BY c.CustomerID, c.CustomerName
-Having COUNT(CategoryID)>1
+Having COUNT( DISTINCT CategoryID)>1
 
 
 -- ### 16. Find customers whose total ordered quantity exceeds 100 units.
+SELECT c.CustomerID, c.CustomerName, COALESCE(SUM(od.quantity),0) as TotalUnitOrdered
+FROM Customers c 
+JOIN Orders o
+ON c.CustomerID = o.CustomerID
+JOIN OrderDetails od
+ON o.OrderID = od.OrderID
+GROUP BY c.CustomerID, c.CustomerName
+HAVING SUM(od.Quantity) > 100
 
 -- ### 17. Show the total sales amount per product.
+SELECT P.ProductID, p.ProductName, SUM(od.Quantity * p.Price) AS TotalSale
+FROM Products p 
+LEFT JOIN OrderDetails od
+ON p.ProductID = od.ProductID
+Group BY P.ProductID, p.ProductName
+ORDER BY P.ProductID
 
 -- ### 18. Find the category with the highest average product price.
+SELECT TOP 1 c.CategoryID, c.CategoryName, AVG(p.Price)
+FROM Categories c LEFT JOIN Products P
+ON c.CategoryID = p.CategoryID
+GROUP BY c.CategoryID, c.CategoryName
+ORDER BY AVG(p.Price) DESC
 
 -- ### 19. List products priced above their category's average price.
+SELECT p.CategoryID, p.ProductID, p.ProductName, p.Price
+FROM Products p 
+WHERE p.Price > (
+    SELECT AVG(P2.price) as AvgPrice
+    FROM Products p2
+    Where p.CategoryID = p2.CategoryID
+    )
+Order BY p.CategoryID
 
 -- ### 20. Find suppliers that supply products in more than one category.
+SELECT s.SupplierID, S.SupplierName, COUNT(DISTINCT P.CategoryID) as TotalCategory
+FROM SUppliers s 
+LEFT JOIN Products p
+ON s.SupplierID = p.SupplierID
+GROUP BY s.SupplierID, S.SupplierName
+Having COUNT(DISTINCT P.CategoryID) > 1
+ORDER BY TotalCategory
 
 -- ### 21. Show the customer who placed the highest number of orders.
+SELECT TOP 1 c.CustomerID, c.CustomerName, COUNT(DISTINCT o.OrderID) as TotalBuys
+FROM Customers c 
+INNER JOIN Orders o
+ON c.CustomerID = o.CustomerID
+Group BY c.CustomerID, c.CustomerName
+ORDER BY TotalBuys DESC
 
 -- ### 22. Find the order containing the highest total quantity of products.
+SELECT TOP 1 o.OrderID, SUM(od.Quantity) as TotalQuantity
+FROM Orders o
+JOIN OrderDetails od
+ON o.OrderID = od.OrderID
+Group BY o.OrderID
+ORDER BY TotalQuantity DESC
+
 
 -- ### 23. List categories whose average price is greater than the overall average product price.
+SELECT c.CategoryID, c.CategoryName, AVG(p.Price) as AvgPrice
+FROM Categories c 
+JOIN Products P
+ON c.CategoryID = p.CategoryID
+GROUP BY c.CategoryID, c.CategoryName
+Having AVG(p.Price) > (
+    SELECT avg(Price) as AveragePrice
+    FROM Products 
+)
+
 
 -- ### 24. Find customers who have ordered every product from a particular category.
+SELECT c.CustomerID, c.CustomerName, p.CategoryID, COUNT(DISTINCT od.ProductID) as TotalUniqueProduct
+FROM Customers c 
+JOIN Orders o
+ON c.CustomerID = o.CustomerID
+JOIN OrderDetails od
+ON o.OrderID = od.OrderID
+JOIN products p 
+ON Od.ProductID = p.ProductID
+GROUP BY c.CustomerID, c.CustomerName, p.CategoryID 
+HAVING COUNT(DISTINCT od.ProductID) = (
+    SELECT COUNT(p2.ProductID) 
+    FROM Products p2
+    WHERE p.CategoryID = p2.CategoryID
+)
+
 
 -- ### 25. Show suppliers whose products have never been ordered.
+SELECT s.SupplierID, s.SupplierName
+FROM Suppliers s 
+LEFT JOIN Products p
+on s.SupplierID = p.SupplierID
+LEFT JOIN OrderDetails od 
+ON od.ProductID = p.ProductID
+GROUP BY s.SupplierID, s.SupplierName
+HAVING COUNT(od.OrderDetailID) = 0
 
 -- ### 26. Find the top 3 customers by total spending.
 
