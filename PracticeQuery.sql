@@ -236,14 +236,76 @@ GROUP BY s.SupplierID, s.SupplierName
 HAVING COUNT(od.OrderDetailID) = 0
 
 -- ### 26. Find the top 3 customers by total spending.
+SELECT TOP 3 c.CustomerID, c.CustomerName, SUM(od.quantity * p.price) as [Total Spending]
+FROM Customers c
+JOIN Orders o
+ON c.CustomerID = o.CustomerID
+JOIN OrderDetails od
+ON o.OrderID = od.OrderID
+JOIN products P
+ON od.ProductID = p.ProductID
+Group BY c.CustomerID, c.CustomerName
+Order BY SUM(od.quantity * p.price) DESC
 
 -- ### 27. For each category, find the product with the highest total quantity sold.
+SELECT c.CategoryID, c.CategoryName, p.ProductName, SUM(od.quantity) AS TotalSold
+FROM Categories c
+JOIN Products P
+ON c.CategoryID = p.CategoryID
+JOIN OrderDetails od
+ON Od.ProductID = p.ProductID
+GROUP BY c.CategoryID, c.CategoryName, p.ProductID, p.ProductName
+Having SUM(od.quantity) = (
+    SELECT TOP 1 SUM(od2.quantity) as total
+    FROM Products p2 
+    LEFT JOIN OrderDetails od2
+    ON p2.ProductID = od2.ProductID
+    WHERE c.CAtegoryID = p2.CategoryID
+    GROUP BY p2.ProductID
+    ORDER BY TOTAL DESC
+) 
+ORDER BY c.CategoryID ASC
 
 -- ### 28. Find products that were ordered by all customers.
+SELECT p.ProductID, p.ProductName
+FROM Products p 
+JOIN OrderDetails od 
+ON p.ProductID = od.ProductID
+JOIN Orders o
+ON od.OrderID = o.OrderID
+GROUP BY p.ProductID, p.ProductName
+HAVING COUNT(DISTINCT o.CustomerID) = (
+    SELECT COUNT(CustomerID) 
+    FROM Customers
+)
 
 -- ### 29. Find customers who ordered products from every category.
+SELECT c.CustomerID, c.CustomerName 
+FROM Customers c 
+LEFT JOIN orders o
+ON c.CustomerID = o.CustomerID
+JOIN OrderDetails od
+ON o.OrderID = od.OrderID
+JOIN products P
+ON od.ProductID = p.ProductID
+GROUP BY c.CustomerID, c.CustomerName
+HAVING COUNT(DISTINCT p.CategoryID) = (
+    SELECT COUNT(CategoryID)
+    FROM Categories
+)
+
 
 -- ### 30. Find pairs of customers who have ordered at least one common product.
+SELECT c1.CustomerName, c2.CustomerName
+FROM Customers c1
+CROSS JOIN Customers c2
+LEFT JOIN Orders o
+ON c1.CustomerID = o.CustomerID
+LEFT JOIN OrderDetails od
+ON od.OrderID = o.OrderID
+LEFT JOIN Products p
+ON p.ProductID = od.ProductID
+WHERE c1.CustomerID < c2.CustomerID;
 
 -- ### 31. Find the second most expensive product.
 
