@@ -296,16 +296,31 @@ HAVING COUNT(DISTINCT p.CategoryID) = (
 
 
 -- ### 30. Find pairs of customers who have ordered at least one common product.
-SELECT c1.CustomerName, c2.CustomerName
-FROM Customers c1
-CROSS JOIN Customers c2
-LEFT JOIN Orders o
-ON c1.CustomerID = o.CustomerID
-LEFT JOIN OrderDetails od
-ON od.OrderID = o.OrderID
-LEFT JOIN Products p
-ON p.ProductID = od.ProductID
-WHERE c1.CustomerID < c2.CustomerID;
+SELECT coh1.CustomerName as Customer1, coh2.CustomerName as Customer2, COUNT(DISTINCT coh1.ProductID) as commonProducts
+FROM (
+    SELECT c.customerID, c.CustomerName, p.ProductName, p.ProductID
+    FROM Customers C
+    JOIN Orders o
+    ON c.CustomerID = o.CustomerID
+    JOIN OrderDetails od
+    ON od.OrderID = o.OrderID
+    JOIN Products P
+    ON p.ProductID = od.ProductID
+) as coh1
+CROSS JOIN (
+    SELECT c.customerID, c.CustomerName, p.ProductName, p.ProductID
+    FROM Customers C
+    JOIN Orders o
+    ON c.CustomerID = o.CustomerID
+    JOIN OrderDetails od
+    ON od.OrderID = o.OrderID
+    JOIN Products P
+    ON p.ProductID = od.ProductID
+) as coh2
+WHERE coh1.CustomerID < coh2.CustomerID 
+AND coh1.ProductID = coh2.ProductID
+GROUP BY coh1.CustomerID, coh1.CustomerName, coh2.customerID, coh2.CustomerName 
+ORDER BY coh1.CustomerName
 
 -- ### 31. Find the second most expensive product.
 
